@@ -1,0 +1,37 @@
+id: 9f7f2d9d-1111-4e21-9b0e-000000000003
+name: Internal Multi-Host Access Burst
+description: Detect one internal source communicating with many internal destinations in a short period.
+severity: High
+kind: Scheduled
+queryFrequency: 15m
+queryPeriod: 15m
+triggerOperator: GreaterThan
+triggerThreshold: 0
+tactics:
+  - LateralMovement
+  - Discovery
+relevantTechniques:
+  - T1021
+  - T1018
+  - T1046
+query: |
+  let timeframe = 15m;
+  let hostThreshold = 15;
+  CommonSecurityLog
+  | where TimeGenerated >= ago(timeframe)
+  | where isnotempty(SourceIP) and isnotempty(DestinationIP)
+  | where ipv4_is_private(SourceIP) and ipv4_is_private(DestinationIP)
+  | summarize DistinctDestinations = dcount(DestinationIP),
+              DestinationList = make_set(DestinationIP, 50),
+              Ports = make_set(DestinationPort, 20),
+              EventCount = count()
+    by SourceIP, bin(TimeGenerated, 5m)
+  | where DistinctDestinations >= hostThreshold
+  | project TimeGenerated, SourceIP, DistinctDestinations, EventCount, Ports, DestinationList
+entityMappings:
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIP
+version: 1.0.0
+status: Available
