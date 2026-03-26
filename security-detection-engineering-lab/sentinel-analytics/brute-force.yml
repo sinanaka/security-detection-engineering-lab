@@ -1,0 +1,26 @@
+id: bf-detection-001
+name: Brute Force Detection
+description: Detect multiple failed login attempts
+severity: Medium
+kind: Scheduled
+queryFrequency: 15m
+queryPeriod: 15m
+triggerOperator: GreaterThan
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+relevantTechniques:
+  - T1110
+query: |
+  let timeframe = 15m;
+  let threshold = 10;
+  SigninLogs
+  | where TimeGenerated > ago(timeframe)
+  | where ResultType != 0
+  | summarize count() by IPAddress
+  | where count_ > threshold
+entityMappings:
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
