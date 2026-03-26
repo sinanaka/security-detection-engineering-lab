@@ -71,9 +71,63 @@ This project demonstrates:
 - Detection rule design and tuning  
 - Log normalisation and enrichment  
 - Behaviour-based detection approaches  
-- SIEM and log pipeline optimisation  
+- SIEM and log pipeline optimisation
 
 ---
+
+## 🔄 Detection Engineering Approach
+
+Each use case in this repository is implemented across multiple platforms to demonstrate a consistent detection engineering approach independent of specific tools.
+
+### Example: Brute Force Detection
+
+The same detection logic is applied across different technologies:
+
+- **KQL (Microsoft Sentinel)**  
+  Detects multiple failed authentication attempts over a defined time window.
+
+- **Splunk (SPL)**  
+  Aggregates failed login events and identifies abnormal volumes from a single source.
+
+- **Sigma (Detection-as-Code)**  
+  Defines a platform-agnostic rule for repeated authentication failures.
+
+- **Sentinel Analytics Rule (YAML)**  
+  Translates detection logic into a scheduled alert with threshold, severity, and entity mapping.
+
+---
+
+### Key Principle
+
+The goal is to design detection logic once and implement it consistently across multiple SIEM platforms, ensuring:
+
+- Reusability of detection logic  
+- Platform-independent thinking  
+- Improved detection coverage  
+- Better alignment with real-world security operations  
+
+This reflects a detection engineering mindset rather than tool-specific implementation.
+This approach allows detections to be portable, adaptable, and production-ready across different environments.
+---
+
+## 🔧 Example Implementations Across Platforms
+
+Below is a simplified example of how the same detection use case is implemented across different tools.
+
+### 🔐 Use Case: Brute Force Detection
+
+#### KQL (Microsoft Sentinel)
+Detects multiple failed login attempts from the same IP within a short timeframe.
+
+  {```kql
+  SigninLogs
+  | where ResultType != 0
+  | summarize FailedAttempts = count() by IPAddress
+  | where FailedAttempts > 10
+  }
+
+---
+
 
 ## 💡 Purpose
 
@@ -83,6 +137,6 @@ This project focuses on converting real-world attack scenarios into **actionable
 
 ## ⚠️ Notes
 
-- Designed for portfolio 
+- Designed for community use
 - Detection thresholds should be environment-specific  
 - Rules should be validated using historical data  
