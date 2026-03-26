@@ -1,0 +1,9 @@
+title: Multiple Failed Sign-Ins
+description: Detects brute force attempts
+logsource:
+  product: azure
+detection:
+  selection:
+    ResultType|neq: 0
+  condition: selection
+level: medium
