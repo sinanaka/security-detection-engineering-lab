@@ -1,0 +1,32 @@
+title: Sensitive Role Assignment
+id: 5d0f8d1a-7b2a-4d1c-9a01-bf1011000002
+status: experimental
+description: Detects assignment of privileged Azure AD or Entra roles.
+author: Sinan Akagunduz
+date: 2026-03-26
+logsource:
+  product: azure
+  service: auditlogs
+detection:
+  selection:
+    OperationName:
+      - Add member to role
+      - Add eligible member to role
+      - Add role assignment
+  keywords:
+    - Global Administrator
+    - Privileged Role Administrator
+    - Security Administrator
+  condition: selection and keywords
+fields:
+  - InitiatedBy
+  - TargetResources
+  - OperationName
+falsepositives:
+  - Approved admin changes
+  - PIM activations
+level: high
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.t1098
