@@ -1,0 +1,28 @@
+// Suspicious Privilege Escalation Detection
+// Purpose: detect sensitive role assignments in Azure AD / Entra audit logs
+// Data source: AuditLogs
+
+let sensitiveRoles = dynamic([
+    "Global Administrator",
+    "Privileged Role Administrator",
+    "Security Administrator",
+    "User Administrator",
+    "Conditional Access Administrator"
+]);
+AuditLogs
+| where TimeGenerated >= ago(24h)
+| where OperationName has_any ("Add member to role", "Add eligible member to role", "Add permanent eligible role assignment", "Add role assignment")
+| extend Initiator = tostring(InitiatedBy.user.userPrincipalName)
+| mv-expand TargetResources
+| extend TargetResourceDisplayName = tostring(TargetResources.displayName)
+| mv-expand modifiedProperties = TargetResources.modifiedProperties
+| extend RoleName = tostring(modifiedProperties.newValue)
+| where RoleName has_any (sensitiveRoles)
+| project
+    TimeGenerated,
+    OperationName,
+    Initiator,
+    TargetResourceDisplayName,
+    RoleName,
+    Result
+| order by TimeGenerated desc

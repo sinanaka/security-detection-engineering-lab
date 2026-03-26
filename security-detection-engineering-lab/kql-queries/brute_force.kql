@@ -1,0 +1,22 @@
+// Brute Force / Credential Stuffing Detection
+// Purpose: detect repeated failed sign-ins from the same IP across one or more accounts
+// Data source: SigninLogs
+
+let timeframe = 15m;
+let failureThreshold = 10;
+SigninLogs
+| where TimeGenerated >= ago(timeframe)
+| where ResultType != 0
+| summarize
+    FailedAttempts = count(),
+    TargetUsers = dcount(UserPrincipalName),
+    Users = make_set(UserPrincipalName, 20)
+    by IPAddress, bin(TimeGenerated, 5m)
+| where FailedAttempts >= failureThreshold
+| project
+    TimeGenerated,
+    IPAddress,
+    FailedAttempts,
+    TargetUsers,
+    Users
+| order by FailedAttempts desc

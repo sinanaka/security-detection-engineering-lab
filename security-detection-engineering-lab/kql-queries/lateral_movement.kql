@@ -1,0 +1,26 @@
+// Lateral Movement / Internal Reconnaissance Detection
+// Purpose: identify one device communicating with many internal destinations in a short period
+// Example data source: CommonSecurityLog or similar network telemetry
+// Adjust field names to your environment
+
+let timeframe = 15m;
+let hostThreshold = 15;
+CommonSecurityLog
+| where TimeGenerated >= ago(timeframe)
+| where isnotempty(SourceIP) and isnotempty(DestinationIP)
+| where ipv4_is_private(SourceIP) and ipv4_is_private(DestinationIP)
+| summarize
+    DistinctDestinations = dcount(DestinationIP),
+    DestinationList = make_set(DestinationIP, 50),
+    Ports = make_set(DestinationPort, 20),
+    EventCount = count()
+    by SourceIP, bin(TimeGenerated, 5m)
+| where DistinctDestinations >= hostThreshold
+| project
+    TimeGenerated,
+    SourceIP,
+    DistinctDestinations,
+    EventCount,
+    Ports,
+    DestinationList
+| order by DistinctDestinations desc
