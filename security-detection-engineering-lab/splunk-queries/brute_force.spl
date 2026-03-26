@@ -1,0 +1,5 @@
+index=authentication
+| where action="failure"
+| stats count as FailedAttempts dc(user) as TargetUsers by src_ip, _time
+| where FailedAttempts > 10
+| sort - FailedAttempts
