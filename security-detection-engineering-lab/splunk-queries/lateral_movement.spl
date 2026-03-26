@@ -1,0 +1,4 @@
+index=network
+| stats dc(dest_ip) as DistinctDestinations values(dest_port) by src_ip, _time
+| where DistinctDestinations > 15
+| sort - DistinctDestinations
