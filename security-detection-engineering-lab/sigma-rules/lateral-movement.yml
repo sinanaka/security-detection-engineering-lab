@@ -1,0 +1,28 @@
+title: Possible Lateral Movement via Internal Multi-Host Access
+id: 5d0f8d1a-7b2a-4d1c-9a01-bf1011000003
+status: experimental
+description: Detects a source system connecting to many internal destinations in a short period.
+author: Sinan Akagunduz
+date: 2026-03-26
+logsource:
+  product: network
+  service: firewall
+detection:
+  selection:
+    SourceIP|re: '^10\\.|^172\\.(1[6-9]|2[0-9]|3[0-1])\\.|^192\\.168\\.'
+    DestinationIP|re: '^10\\.|^172\\.(1[6-9]|2[0-9]|3[0-1])\\.|^192\\.168\\.'
+  timeframe: 15m
+  condition: selection
+fields:
+  - SourceIP
+  - DestinationIP
+  - DestinationPort
+falsepositives:
+  - Vulnerability scanners
+  - Admin jump servers
+level: high
+tags:
+  - attack.lateral_movement
+  - attack.discovery
+  - attack.t1021
+  - attack.t1018
