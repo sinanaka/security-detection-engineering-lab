@@ -1,0 +1,4 @@
+index=azure_audit
+| search operation="Add member to role"
+| stats count by user, role, src_ip, _time
+| search role IN ("Global Administrator","Privileged Role Administrator","Security Administrator")
